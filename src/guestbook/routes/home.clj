@@ -1,19 +1,19 @@
 (ns guestbook.routes.home
   (:require [compojure.core :refer :all]
             [guestbook.views.layout :as layout]
-            [hiccup.form :as hf]))
+            [hiccup.form :as hf]
+            [guestbook.models.db :as db]))
+
 
 (defn show-guests []
-  (let [dummy-messages
-        [{:message "howdy" :name "bob" :timestamp nil}
-         {:message "hello" :name "alice" :timestamp nil}]]
+  (let [guest-records (db/read-guests)]
     [:ul.guests
      (map (fn [msg-record]
             [:li
              [:blockquote (:message msg-record)]
              [:p "-" [:cite (:name msg-record)]]
              [:time (:timestamp msg-record)]])
-          dummy-messages)]))
+          guest-records)]))
 
 
 (defn home [& [name message error]]
@@ -31,6 +31,7 @@
                [:br]
                (hf/submit-button "comment"))))
 
+
 (defn save-message
   [name message]
   (cond
@@ -38,7 +39,9 @@
                         "oops, they forgot to leave a name")
     (empty? message) (home name message
                            "pffft, they didn't leave a message")
-    :else (home)))
+    :else (do ;; save message, and then re-render server-side hiccup HTML
+            (db/save-message name message)
+            (home))))
 
 
 (defroutes home-routes
