@@ -22,25 +22,27 @@
   (layout/common
    [:h1 "Guestbook"]
    [:p "Welcome to my guestbook app"]
-   [:p error]
-   (show-guests) ; punch in list of existing comments
-   [:hr]
    (hf/form-to [:post "/"]
                [:p "Name:"]
                (hf/text-field "name" name)
                [:p "Message:"]
                (hf/text-area {:rows 10 :cols 40} "message" message)
                [:br]
-               (hf/submit-button "comment"))))
+               (hf/submit-button "comment"))
+   [:p.error [:strong error]]
+   [:br]
+   [:hr]
+   [:br]
+   (show-guests))) ; punch in list of existing comments
 
 
 (defn save-message
   [name message]
   (cond
     (empty? name) (home name message
-                        "oops, they forgot to leave a name")
+                        "Yikes, you forgot to add your name")
     (empty? message) (home name message
-                           "pffft, they didn't leave a message")
+                           "Oops, you forgot to leave a message")
     :else (do ;; save message, and then re-render server-side hiccup HTML
             (db/save-message name message)
             (home))))

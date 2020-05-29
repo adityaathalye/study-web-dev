@@ -8,3 +8,6 @@ h1 {
     text-align: center;
 }
 
+p.error {
+    color: #FF0000
+}
