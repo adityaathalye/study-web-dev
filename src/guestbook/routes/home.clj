@@ -31,6 +31,16 @@
                [:br]
                (hf/submit-button "comment"))))
 
+(defn save-message
+  [name message]
+  (cond
+    (empty? name) (home name message
+                        "oops, they forgot to leave a name")
+    (empty? message) (home name message
+                           "pffft, they didn't leave a message")
+    :else (home)))
+
 
 (defroutes home-routes
-  (GET "/" [] (home)))
+  (GET "/" [] (home))
+  (POST "/" [name message] (save-message name message)))
