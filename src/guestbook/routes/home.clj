@@ -2,7 +2,8 @@
   (:require [compojure.core :refer :all]
             [guestbook.views.layout :as layout]
             [hiccup.form :as hf]
-            [guestbook.models.db :as db]))
+            [guestbook.models.db :as db]
+            [guestbook.utils.datetime :as dateutil]))
 
 
 (defn show-guests []
@@ -12,7 +13,8 @@
             [:li
              [:blockquote (:message msg-record)]
              [:p "-" [:cite (:name msg-record)]]
-             [:time (:timestamp msg-record)]])
+             [:time (dateutil/format-time
+                     (:timestamp msg-record))]])
           guest-records)]))
 
 
