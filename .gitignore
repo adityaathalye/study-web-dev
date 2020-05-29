@@ -12,3 +12,4 @@ pom.xml
 .clj-kondo
 .lein-repl-history
 .nrepl-port
+*.sq3
