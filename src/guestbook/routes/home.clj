@@ -51,3 +51,33 @@
 (defroutes home-routes
   (GET "/" [] (home))
   (POST "/" [name message] (save-message name message)))
+
+
+(defn home-routes-handler-coded-manually
+  [request]
+  (cond
+    (and (= "/" (:uri request))
+         (= :get (:request-method request)))
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body (home)}
+
+    (and (= "/" (:uri request))
+         (= :post (:request-method request)))
+    (let [form-value-parser #'ring.middleware.params/parse-params
+          form-value-string (slurp (:body request)
+                                   :encoding "UTF-8")
+          form-params-map (form-value-parser form-value-string
+                                             "UTF-8")
+          name (get form-params-map "name")
+          message  (get form-params-map "message")]
+
+      (save-message name message)
+      {:status 200
+       :headers {}
+       :body (home)})
+
+    :else
+    {:status 200
+     :headers {"Content-Type" "text/plain"}
+     :body (str request)}))

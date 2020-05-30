@@ -6,7 +6,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [guestbook.routes.home :refer [home-routes]]
+            [guestbook.routes.home :as grh :refer [home-routes]]
             [guestbook.models.db :as db])
   (:gen-class))
 
@@ -27,9 +27,10 @@
 
 
 (def app
-  (-> (routes home-routes app-routes)
-      (handler/site)
-      (wrap-base-url)))
+  ;; (-> (routes home-routes app-routes)
+  ;;     (handler/site)
+  ;;     (wrap-base-url))
+  grh/home-routes-handler-coded-manually)
 
 
 (defn -main
