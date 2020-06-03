@@ -50,4 +50,12 @@
   (GET "/login" [] (login-page))
   (POST "/login" [id pass]
         (session/put! :user id)
+        (nr/redirect "/"))
+
+  (GET "/logout" []
+       (layout/common
+        (hf/form-to [:post "/logout"]
+                    (hf/submit-button "logout"))))
+  (POST "/logout" []
+        (session/clear!)
         (nr/redirect "/")))
