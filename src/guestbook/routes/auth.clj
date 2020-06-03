@@ -30,14 +30,30 @@
   (registration-page)
   )
 
+
 (defn login-page
-  []
+  [& [error]]
   (layout/common
+   (when error
+     [:div [:p.error [:strong "Login error: " error]]])
    (hf/form-to [:post "/login"]
                (control hf/text-field "id" "Screen Name")
                (control hf/password-field "pass" "Password")
                (hf/submit-button "login"))))
 
+
+(defn handle-login
+  [id pass]
+  (cond
+    (empty? id) (login-page
+                 "screen name is required")
+    (empty? pass) (login-page
+                   "password is required")
+    (and (= "foo" id)
+         (= "bar" pass)) (do (session/put! :user id)
+                             (nr/redirect "/"))
+    :else (login-page
+           "authentication failed")))
 
 
 (defroutes auth-routes
@@ -49,8 +65,7 @@
 
   (GET "/login" [] (login-page))
   (POST "/login" [id pass]
-        (session/put! :user id)
-        (nr/redirect "/"))
+        (handle-login id pass))
 
   (GET "/logout" []
        (layout/common
