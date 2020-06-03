@@ -42,3 +42,106 @@
     (jetty/run-jetty #'app
                      {:port port
                       :join? false})))
+
+
+(comment
+
+  ;; defroutes is a macro
+  (macroexpand
+   '(defroutes foobar
+      (compojure.core/GET "/:id" [id] (str "<p>the id is : " id "</p>"))
+      (compojure.core/GET "/:other-id" [other-id] (str "<p>the other id is : " other-id "</p>"))))
+
+  ;; defroutes creates a def with a composite 'route' that wraps over the
+  ;; sequence of routes defined using the HTTP macros GET/POST etc.
+  (def
+    foobar
+    (compojure.core/routes
+     (compojure.core/GET "/:id" [id] (str "<p>the id is : " id "</p>"))
+     (compojure.core/GET "/:other-id" [other-id] (str "<p>the other id is : " other-id "</p>"))))
+
+
+  ;; GET is a macro, so for example...
+  (macroexpand
+   '(compojure.core/GET "/:id" [id] (str "<p>the id is : " id "</p>")))
+
+  (compojure.core/make-route
+   :get
+   {:source "/:id", :re #"/([^/,;?]+)", :keys [:id], :absolute? false}
+   (clojure.core/fn
+     [request__2318__auto__]
+     (compojure.core/let-request
+      [[id] request__2318__auto__]
+      (str "<p>the id is : " id "</p>"))))
+
+  ;; let-request is also a macro
+  (macroexpand
+   '(compojure.core/let-request
+     [[id] request__2318__auto__]
+     (str "<p>the id is : " id "</p>")))
+
+  (let*
+      [id
+       (clojure.core/get-in
+        request__2318__auto__
+        [:params :id]
+        (clojure.core/get-in request__2318__auto__ [:params "id"]))]
+    (do (str "<p>the id is : " id "</p>")))
+
+  ;; the whole thing expands to:
+
+  (def
+    foobar
+    (compojure.core/routes
+     (compojure.core/make-route
+      :get
+      {:source "/:id", :re #"/([^/,;?]+)", :keys [:id], :absolute? false}
+      (clojure.core/fn
+        [request__2318__auto__]
+        (let*
+            [id
+             (clojure.core/get-in
+              request__2318__auto__
+              [:params :id]
+              (clojure.core/get-in request__2318__auto__ [:params "id"]))]
+          (do (str "<p>the id is : " id "</p>")))))
+     (compojure.core/make-route
+      :get
+      {:source "/:other-id", :re #"/([^/,;?]+)", :keys [:other-id], :absolute? false}
+      (clojure.core/fn
+        [request__2318__auto__]
+        (let*
+            [other-id
+             (clojure.core/get-in
+              request__2318__auto__
+              [:params :other-id]
+              (clojure.core/get-in request__2318__auto__ [:params "other-id"]))]
+          (do (str "<p>the other id is : " other-id "</p>")))))))
+
+
+  ;; context macro
+  (macroexpand
+   '(compojure.core/context
+     "an/arbit/path/:company"
+     (compojure.core/GET "/:id" [id] (str "<p>the id is : " id "</p>"))
+     (compojure.core/GET "/:other-id" [other-id] (str "<p>the other id is : " other-id "</p>"))))
+
+  (compojure.core/make-context
+   {:source "an/arbit/path/:company:__path-info",
+    :re #"an/arbit/path/([^/,;?]+)(|/.*)",
+    :keys [:company :__path-info],
+    :absolute? false}
+   (clojure.core/fn
+     [request__2400__auto__]
+     (compojure.core/let-request
+      [(compojure.core/GET
+        "/:id"
+        [id]
+        (str "<p>the id is : " id "</p>"))
+       request__2400__auto__]
+      (compojure.core/routes
+       (compojure.core/GET
+        "/:other-id"
+        [other-id]
+        (str "<p>the other id is : " other-id "</p>"))))))
+  )
