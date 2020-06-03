@@ -4,19 +4,24 @@
             [hiccup.form :as hf]))
 
 
+(defn control
+  [field fname ftext]
+  (list (hf/label fname ftext)
+        (field fname)
+        [:br]))
+
+(comment
+  (control hf/text-field "id" "screen name")
+  )
+
+
 (defn registration-page
   []
   (layout/common
    (hf/form-to [:post "/register"]
-               (hf/label "id" "screen name")
-               (hf/text-field "id")
-               [:br]
-               (hf/label "pass" "password")
-               (hf/password-field "pass")
-               [:br]
-               (hf/label "pass1" "retype password")
-               (hf/password-field "pass1")
-               [:br]
+               (control hf/text-field "id" "screen name")
+               (control hf/password-field "pass" "password")
+               (control hf/password-field "pass1" "retype password")
                (hf/submit-button "create account"))))
 
 (comment
