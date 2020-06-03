@@ -1,15 +1,12 @@
 (ns guestbook.handler
+  (:gen-class)
   (:require [compojure.core :refer [defroutes routes]]
-            [ring.middleware.resource :refer [wrap-resource]]
-            [ring.middleware.file-info :refer [wrap-file-info]]
-            [ring.adapter.jetty :as jetty]
-            [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
+            [guestbook.models.db :as db]
             [guestbook.routes.home :refer [home-routes]]
-            [guestbook.models.db :as db])
-  (:gen-class))
-
+            [hiccup.middleware :refer [wrap-base-url]]
+            [ring.adapter.jetty :as jetty]))
 
 (defn init []
   (println "guestbook is starting")
