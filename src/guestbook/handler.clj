@@ -4,6 +4,7 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [guestbook.models.db :as db]
+            [guestbook.routes.auth :as auth]
             [guestbook.routes.home :refer [home-routes]]
             [hiccup.middleware :refer [wrap-base-url]]
             [ring.adapter.jetty :as jetty]))
@@ -24,7 +25,11 @@
 
 
 (def app
-  (-> (routes home-routes app-routes)
+  (-> (routes auth/auth-routes
+              home-routes
+              ;; app-routes must always be last as it
+              ;; handles "not-found" routes
+              app-routes)
       (handler/site)
       (wrap-base-url)))
 
