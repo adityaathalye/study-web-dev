@@ -7,7 +7,9 @@
             [guestbook.routes.auth :as auth]
             [guestbook.routes.home :refer [home-routes]]
             [hiccup.middleware :refer [wrap-base-url]]
-            [ring.adapter.jetty :as jetty]))
+            [noir.session :as session]
+            [ring.adapter.jetty :as jetty]
+            [ring.middleware.session.memory :refer [memory-store]]))
 
 (defn init []
   (println "guestbook is starting")
@@ -31,6 +33,8 @@
               ;; handles "not-found" routes
               app-routes)
       (handler/site)
+      (session/wrap-noir-session
+       {:store (memory-store)})
       (wrap-base-url)))
 
 

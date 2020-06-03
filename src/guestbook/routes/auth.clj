@@ -2,7 +2,8 @@
   (:require [compojure.core :refer [defroutes GET POST]]
             [guestbook.views.layout :as layout]
             [hiccup.form :as hf]
-            [noir.response :as nr]))
+            [noir.response :as nr]
+            [noir.session :as session]))
 
 
 (defn control
@@ -29,10 +30,24 @@
   (registration-page)
   )
 
+(defn login-page
+  []
+  (layout/common
+   (hf/form-to [:post "/login"]
+               (control hf/text-field "id" "Screen Name")
+               (control hf/password-field "pass" "Password")
+               (hf/submit-button "login"))))
+
+
 
 (defroutes auth-routes
   (GET "/register" [_] (registration-page))
   (POST "/register" [id pass pass1]
         (if (= pass pass1)
           (nr/redirect "/")
-          (registration-page))))
+          (registration-page)))
+
+  (GET "/login" [] (login-page))
+  (POST "/login" [id pass]
+        (session/put! :user id)
+        (nr/redirect "/")))

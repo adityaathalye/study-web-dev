@@ -3,7 +3,8 @@
             [guestbook.views.layout :as layout]
             [hiccup.form :as hf]
             [guestbook.models.db :as db]
-            [guestbook.utils.datetime :as dateutil]))
+            [guestbook.utils.datetime :as dateutil]
+            [noir.session :as session]))
 
 
 (defn show-guests []
@@ -20,7 +21,7 @@
 
 (defn home [& [name message error]]
   (layout/common
-   [:h1 "Guestbook"]
+   [:h1 "Guestbook " (session/get :user)]
    [:p "Welcome to my guestbook app"]
    (hf/form-to [:post "/"]
                [:p "Name:"]
