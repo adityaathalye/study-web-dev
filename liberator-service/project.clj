@@ -5,8 +5,8 @@
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
                  [ring-server "0.5.0"]
-                 [liberator "0.11.0"]
-                 [cheshire "5.3.1"]]
+                 [liberator "0.15.3"]
+                 [cheshire "5.10.0"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler liberator-service.handler/app
          :init liberator-service.handler/init
