@@ -4,7 +4,9 @@
             [hiccup.form :as hf]
             [noir.response :as nr]
             [noir.session :as session]
-            [noir.validation :refer [rule errors? has-value? on-error]]))
+            [noir.util.crypt :as crypt]
+            [noir.validation :refer [errors? has-value? on-error rule]]
+            [guestbook.models.db :as db]))
 
 (defn format-error
   [[error]]
@@ -67,12 +69,20 @@
         (nr/redirect "/"))))
 
 
+(defn handle-registration
+  [id pass pass1]
+  (rule (= pass pass1)
+        ["pass" "password was not retyped correctly"])
+  (if (errors? "pass")
+    (registration-page)
+    (do (db/add-user-record {:id id :pass (crypt/encrypt pass)})
+        (nr/redirect "/login"))))
+
+
 (defroutes auth-routes
   (GET "/register" [_] (registration-page))
   (POST "/register" [id pass pass1]
-        (if (= pass pass1)
-          (nr/redirect "/")
-          (registration-page)))
+        (handle-registration id pass pass1))
 
   (GET "/login" [] (login-page))
   (POST "/login" [id pass]
