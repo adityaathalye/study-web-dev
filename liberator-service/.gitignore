@@ -1,9 +1,6 @@
 /target
-*/target
 /lib
-*/lib
 /classes
-*/classes
 /checkouts
 pom.xml
 *.jar
@@ -12,7 +9,3 @@ pom.xml
 .lein-failures
 .lein-plugins
 .lein-env
-.clj-kondo
-.lein-repl-history
-.nrepl-port
-*.sq3
