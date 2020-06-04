@@ -8,6 +8,7 @@
             [guestbook.routes.home :refer [home-routes]]
             [hiccup.middleware :refer [wrap-base-url]]
             [noir.session :as session]
+            [noir.validation :refer [wrap-noir-validation]]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.session.memory :refer [memory-store]]))
 
@@ -35,6 +36,7 @@
       (handler/site)
       (session/wrap-noir-session
        {:store (memory-store)})
+      (wrap-noir-validation)
       (wrap-base-url)))
 
 

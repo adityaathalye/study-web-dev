@@ -3,17 +3,26 @@
             [guestbook.views.layout :as layout]
             [hiccup.form :as hf]
             [noir.response :as nr]
-            [noir.session :as session]))
+            [noir.session :as session]
+            [noir.validation :refer [rule errors? has-value? on-error]]))
+
+(defn format-error
+  [[error]]
+  [:div [:p.error [:strong error]]])
 
 
 (defn control
   [field fname ftext]
-  (list (hf/label fname ftext)
+  (list (on-error fname format-error)
+        (hf/label fname ftext)
         (field fname)
         [:br]))
 
 (comment
-  (control hf/text-field "id" "screen name")
+  ;; adding on-error to control introduces error state, and we now must
+  ;; provide the binding, to test any call with 'control' in it's call chain
+  (binding [noir.validation/*errors* (atom {})]
+    (control hf/text-field "id" "screen name"))
   )
 
 
@@ -27,15 +36,14 @@
                (hf/submit-button "create account"))))
 
 (comment
-  (registration-page)
+  (binding [noir.validation/*errors* (atom {})]
+    (registration-page))
   )
 
 
 (defn login-page
-  [& [error]]
+  []
   (layout/common
-   (when error
-     [:div [:p.error [:strong "Login error: " error]]])
    (hf/form-to [:post "/login"]
                (control hf/text-field "id" "Screen Name")
                (control hf/password-field "pass" "Password")
@@ -44,16 +52,19 @@
 
 (defn handle-login
   [id pass]
-  (cond
-    (empty? id) (login-page
-                 "screen name is required")
-    (empty? pass) (login-page
-                   "password is required")
-    (and (= "foo" id)
-         (= "bar" pass)) (do (session/put! :user id)
-                             (nr/redirect "/"))
-    :else (login-page
-           "authentication failed")))
+  (rule (has-value? id)
+        ["id" "screen name is required"])
+  (rule (= id "foo")
+        ["id" "unknown user"])
+  (rule (has-value? pass)
+        ["pass" "password is required"])
+  (rule (= pass "bar")
+        ["pass" "invalid password"])
+
+  (if (errors? "id" "pass")
+    (login-page)
+    (do (session/put! :user id)
+        (nr/redirect "/"))))
 
 
 (defroutes auth-routes
