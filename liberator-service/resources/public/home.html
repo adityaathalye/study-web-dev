@@ -18,7 +18,7 @@
       }
       function addUser() {
           var jqxhr = $.post("/add-user",
-                             {:user: $('#name').val()},
+                             {user: $('#name').val()},
                              renderUsers).fail(handleError);
       }
       $(function() {getUsers();});
