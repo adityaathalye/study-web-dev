@@ -30,12 +30,12 @@
   :allowed-methods [:post]
   :malformed? (fn [context]
                 (empty?
-                 (get-in context [:form-params :request "user"])))
+                 (get-in context [:request :form-params "user"])))
   :handle-malformed "user name cannot be empty!"
   :post! (fn [context]
            (swap! users
                   conj
-                  (get-in context [:form-params :request "user"])))
+                  (get-in context [:request :form-params "user"])))
   :handle-created (fn [_] (generate-string @users))
   :available-media-types ["application/json"])
 
