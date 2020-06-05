@@ -28,6 +28,10 @@
 
 (defresource add-user
   :allowed-methods [:post]
+  :malformed? (fn [context]
+                (empty?
+                 (get-in context [:form-params :request "user"])))
+  :handle-malformed "user name cannot be empty!"
   :post! (fn [context]
            (swap! users
                   conj
