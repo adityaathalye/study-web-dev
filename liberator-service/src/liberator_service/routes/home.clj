@@ -1,13 +1,9 @@
 (ns liberator-service.routes.home
   (:require [cheshire.core :refer [generate-string]]
             [compojure.core :refer :all]
-            [liberator.core :refer [defresource request-method-in resource]]))
+            [liberator.core :refer [defresource request-method-in]]))
 
-(def users (atom ["Firstame" "Lastname"]))
-
-
-(defn home []
-  (layout/common [:h1 "Hello World!"]))
+(def users (atom ["John" "Jane"]))
 
 
 (defresource home
@@ -22,6 +18,22 @@
   :handle-ok "Hello World!"
   :etag "fixed-etag"
   :available-media-types ["text/plain"])
+
+
+(defresource get-users
+  :allowed-methods [:get]
+  :handle-ok (fn [_] (generate-string @users))
+  :available-media-types ["application/json"])
+
+
+(defresource add-user
+  :allowed-methods [:post]
+  :post! (fn [context]
+           (swap! users
+                  conj
+                  (get-in context [:form-params :request "user"])))
+  :handle-created (fn [_] (generate-string @users))
+  :available-media-types ["application/json"])
 
 
 (defroutes home-routes
