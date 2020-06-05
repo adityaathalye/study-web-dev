@@ -1,23 +1,25 @@
 (ns liberator-service.routes.home
   (:require [cheshire.core :refer [generate-string]]
             [compojure.core :refer :all]
-            [liberator.core :refer [defresource request-method-in]]))
+            [liberator.core :refer [defresource request-method-in]]
+            [noir.io :as io]
+            [clojure.java.io :as jio]))
 
 (def users (atom ["John" "Jane"]))
 
 
 (defresource home
-  :service-available? true
-  :handle-service-not-available
-  "service is currently unavailable..."
+  :available-media-types ["text/html"]
 
-  :method-allowed? (request-method-in :get)
-  :handle-method-not-allowed (fn [ctx]
-                               (str (get-in ctx [:request :request-method])
-                                    " is not allowed"))
-  :handle-ok "Hello World!"
-  :etag "fixed-etag"
-  :available-media-types ["text/plain"])
+  :exists? (fn [context]
+             [(io/get-resource "/home.html")
+              {::file (jio/file (str (io/resource-path) "home.html"))}])
+
+  :handle-ok (fn [{{{resource :resource} :route-params} :request}]
+               (jio/input-stream (io/get-resource "/home.html")))
+
+  :last-modified (fn [{{{resource :resource} :route-params} :request}]
+                   (.lastModified (jio/file (str (io/resource-path) "home.html")))))
 
 
 (defresource get-users
@@ -41,4 +43,6 @@
 
 
 (defroutes home-routes
-  (ANY "/" request home))
+  (ANY "/" request home)
+  (ANY "/add-user" request add-user)
+  (ANY "/users" request get-users))
