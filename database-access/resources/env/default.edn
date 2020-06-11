@@ -1,0 +1,4 @@
+{:subprotocol "postgresql"
+ :subname "//localhost/my_website"
+ :user "FIXME"
+ :password "FIXME"}
