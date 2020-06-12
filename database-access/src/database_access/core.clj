@@ -111,4 +111,26 @@
 
   ;; READ SOME
   (get-user)
+
+  ;; TRANSACT
+  (sql/with-connection db
+    (sql/delete-rows
+     :users
+     ["id=?" "bar"]))
+
+  (add-user3 "bar" "funnypass")
+
+  (sql/with-connection db
+    (sql/transaction
+     (sql/update-values
+      :users
+      ["id=?" "foo"]
+      {:pass (str (rand))})
+
+     (sql/update-or-insert-values
+      :users
+      ["id=?" "bar"]
+      {:pass "baz"})))
+
+  (get-user)
   )
