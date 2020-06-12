@@ -56,3 +56,59 @@
           {:id (str "foo" n)
            :pass (str "bar" n)})
         (range 20 30))))
+
+
+(defn add-user3
+  [id pass]
+  (sql/with-connection db
+    (sql/insert-rows :users [id pass])))
+
+
+(defn get-user
+  ([]
+   (sql/with-connection db
+     (sql/with-query-results
+       res
+       ["select * from users limit 10"]
+       (doall res))))
+  ([id]
+   (sql/with-connection db
+     (sql/with-query-results
+       res
+       ["select * from users where id = ?" id]
+       (first res)))))
+
+
+(comment
+  ;; CREATE
+  (add-user3
+   "randid" "asdfasd")
+
+  ;; READ
+  (get-user "randid")
+
+  ;; UPDATE
+  (sql/with-connection db
+    (sql/update-values
+     :users
+     ["id=?" "foo"]
+     {:pass "barrrr"}))
+
+  ;; UPSERT
+  (sql/with-connection db
+    (sql/update-or-insert-values
+     :users
+     ["id=?" "foo"]
+     {:pass "bar"}))
+
+  ;; DELETE
+  (sql/with-connection db
+    ;; for current lack of knowing how to write range queries
+    (doseq [n (concat (range 10)
+                      (range 20 30))]
+      (sql/delete-rows
+       :users ["id=?" (str "foo" n)])))
+
+  ;; READ SOME
+  (get-user)
+  )
