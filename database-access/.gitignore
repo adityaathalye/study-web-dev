@@ -12,3 +12,4 @@ pom.xml.asc
 .hg/
 /resources/env/*
 !/resources/env/default.edn
+*.pdf
