@@ -96,5 +96,29 @@
     (employee-template-paragraph
      (read-employees))]
    "report.pdf")
-
   )
+
+
+(defn table-report
+  [out]
+  (pdf/pdf
+   [{:header "Employee List"}
+    (into [:table
+           {:border false
+            :cell-border false
+            :header [{:background-color [0 150 150]}
+                     "Name" "Occupation" "Place" "Country"]}]
+          (employee-template (read-employees)))]
+   out))
+
+
+(defn list-report
+  [out]
+  (pdf/pdf
+   [{}
+    [:heading {:size 10} "Employees"]
+    [:line]
+    [:spacer]
+    (employee-template-paragraph
+     (read-employees))]
+   out))
