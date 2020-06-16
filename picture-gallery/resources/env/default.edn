@@ -1,4 +1,5 @@
-{:subprotocol "postgresql"
+{:dbtype "postgresql"
+ :subprotocol "postgresql"
  :subname "//localhost/gallery"
  :user "FIXME"
- :pass "FIXME"}
+ :password "FIXME"}
