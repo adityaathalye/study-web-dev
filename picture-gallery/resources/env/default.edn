@@ -1,0 +1,4 @@
+{:subprotocol "postgresql"
+ :subname "//localhost/gallery"
+ :user "FIXME"
+ :pass "FIXME"}

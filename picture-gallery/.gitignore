@@ -9,3 +9,5 @@ pom.xml
 .lein-failures
 .lein-plugins
 .lein-env
+/resources/env/*
+!/resources/env/default.edn
