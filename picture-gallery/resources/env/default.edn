@@ -1,4 +1,5 @@
 {:dbtype "postgresql"
+ :classname "org.postgresql.Driver"
  :subprotocol "postgresql"
  :subname "//localhost/gallery"
  :user "FIXME"

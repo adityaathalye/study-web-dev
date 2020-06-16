@@ -3,13 +3,14 @@
             [picture-gallery.models.db :as db]))
 
 (defn create-users-table
-  []
-  (sql/with-db-connection [db db/db]
-    (sql/db-do-commands db
-     (sql/create-table-ddl :users
-                           [[:id "varchar(32) PRIMARY KEY"]
-                            [:pass "varchar(100)"]]))))
+  [db-conn]
+  (sql/db-do-commands db-conn
+                      (sql/create-table-ddl :users
+                                            [[:id "varchar(32) PRIMARY KEY"]
+                                             [:pass "varchar(100)"]])))
+
 
 (comment
-  (create-users-table)
+  (create-users-table db/db-conn)
+  (sql/get-connection db/db-conn)
   )

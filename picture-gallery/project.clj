@@ -7,7 +7,9 @@
                  [ring-server "0.5.0"]
                  [org.clojure/java.jdbc "0.7.11"]
                  ;; https://mvnrepository.com/artifact/org.postgresql/postgresql
-                 [org.postgresql/postgresql "42.2.14"]]
+                 [org.postgresql/postgresql "42.2.14"]
+                 ;; https://www.mchange.com/projects/c3p0/#basics
+                 [com.mchange/c3p0 "0.9.5.5"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler picture-gallery.handler/app
          :init picture-gallery.handler/init
