@@ -2,8 +2,10 @@
   (:require [compojure.core :refer :all]
             [picture-gallery.views.layout :as layout]))
 
-(defn home []
-  (layout/common [:h1 "Hello World!"]))
+(defn home [request]
+  (layout/common [:h1 (str "Hello World! "
+                           (get-in request [:session :user-id]
+                                   "ANONYMOUS"))]))
 
 (defroutes home-routes
-  (GET "/" [] (home)))
+  (GET "/" request (home request)))
