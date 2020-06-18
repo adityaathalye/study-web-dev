@@ -19,6 +19,6 @@
   (route/not-found "Not Found"))
 
 (def app
-  (-> (routes home-routes auth-routes app-routes)
+  (-> (routes auth-routes home-routes app-routes)
       (handler/site)
       (wrap-base-url)))
