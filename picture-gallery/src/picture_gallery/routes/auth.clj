@@ -8,7 +8,7 @@
 
 
 (defn registration-page
-  [& [id]]
+  [& [id error-msg]]
   (layout/common
    (hf/form-to [:post "/register"]
                (hf/label "user-id" "user id")
@@ -19,14 +19,30 @@
                [:br]
                (hf/label "pass1" "retype password")
                (hf/password-field "pass1")
-               [:br]
+               (if error-msg
+                 [:p.error error-msg]
+                 [:br])
                (hf/submit-button "create account"))))
 
 
+(defn registration-error?
+  [id pass pass1]
+  (cond (empty? id)
+        "User ID is required."
+        (>= 5 (count pass))
+        "Password must be greater than 5 characters."
+        (not= pass pass1)
+        "Passwords do not match."
+        :else false))
+
+
 (defn handle-registration
-  [id pass pass1 request]
-  (assoc-in (response/redirect "/" :see-other)
-            [:session :user-id] id))
+  [id pass pass1]
+  (if-let [error-msg (registration-error? id pass pass1)]
+    (registration-page id
+                       error-msg)
+    (assoc-in (response/redirect "/" :see-other)
+              [:session :user-id] id)))
 
 
 (defroutes auth-routes
