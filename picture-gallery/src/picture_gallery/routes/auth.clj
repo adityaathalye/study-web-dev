@@ -48,6 +48,5 @@
 (defroutes auth-routes
   (GET "/register" []
        (registration-page))
-  (POST "/register" [id pass pass1 & request]
-        (handle-registration id pass pass1 request))
-  )
+  (POST "/register" [id pass pass1]
+        (handle-registration id pass pass1)))
