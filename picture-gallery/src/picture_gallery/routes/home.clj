@@ -1,5 +1,5 @@
 (ns picture-gallery.routes.home
-  (:require [compojure.core :refer :all]
+  (:require [compojure.core :refer [GET defroutes]]
             [picture-gallery.views.layout :as layout]))
 
 (defn home [request]
