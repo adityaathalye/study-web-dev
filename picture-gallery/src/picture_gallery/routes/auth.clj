@@ -16,6 +16,14 @@
         :else false))
 
 
+(defn register-or-redirect
+  [{{user-id :user-id} :session}]
+  (if user-id
+    (assoc-in (response/redirect "/" :see-other)
+              [:session :user-id] user-id)
+    (va/registration-page)))
+
+
 (defn handle-registration
   [id pass pass1]
   (let [form-error-msg (registration-error? id pass pass1)
@@ -35,7 +43,7 @@
 
 
 (defroutes auth-routes
-  (GET "/register" []
-       (va/registration-page))
+  (GET "/register" request
+       (register-or-redirect request))
   (POST "/register" [id pass pass1]
         (handle-registration id pass pass1)))
