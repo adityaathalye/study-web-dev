@@ -2,7 +2,8 @@
   (:require [compojure.core :refer [defroutes GET POST]]
             [picture-gallery.models.db :as db]
             [picture-gallery.views.auth :as va]
-            [ring.util.response :as response]))
+            [ring.util.response :as response]
+            [picture-gallery.views.home :as vh]))
 
 
 (defn registration-error?
@@ -42,8 +43,37 @@
                       [:session :user-id] id))))
 
 
+(defn handle-login
+  [id pass]
+  (let [user (db/get-user id)]
+    (if (and (= (:id user) id)
+             (= (:pass user) pass))
+      (assoc-in (response/redirect "/" :see-other)
+                [:session :user-id] id)
+      (-> (response/redirect "/login" :see-other)
+          (assoc-in [:session :error]
+                    "Bad username or password. Please retry.")
+          (assoc-in [:session :user-id]
+                    nil)))))
+
+
+(defn handle-logout
+  []
+  (assoc-in
+   (response/redirect "/" :see-other)
+   [:session :user-id] nil))
+
+
 (defroutes auth-routes
   (GET "/register" request
        (register-or-redirect request))
   (POST "/register" [id pass pass1]
-        (handle-registration id pass pass1)))
+        (handle-registration id pass pass1))
+
+  (GET "/login" {{error :error} :session}
+       (va/login-page error))
+  (POST "/login" [id pass]
+        (handle-login id pass))
+
+  (GET "/logout" []
+       (handle-logout)))

@@ -1,5 +1,6 @@
 (ns picture-gallery.views.auth
-  (:require [hiccup.form :as hf]
+  (:require [hiccup.element :as he]
+            [hiccup.form :as hf]
             [picture-gallery.views.layout :as layout]))
 
 (defn registration-page
@@ -18,3 +19,24 @@
                  [:p.error error-msg]
                  [:br])
                (hf/submit-button "create account"))))
+
+
+(defn login-form
+  [& [id error-msg]]
+  (hf/form-to
+   [:post "/login"]
+   (hf/text-field {:placeholder "screen-name"} "id")
+   (hf/password-field {:placeholder "password"} "pass")
+   (when error-msg [:p.error error-msg])
+   (hf/submit-button "login")))
+
+
+(defn logout-link
+  [id]
+  (he/link-to "/logout" (str "Logout, " id)))
+
+
+(defn login-page
+  [error]
+  (layout/common
+   (login-form nil error)))

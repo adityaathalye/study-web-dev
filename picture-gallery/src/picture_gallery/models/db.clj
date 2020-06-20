@@ -72,3 +72,10 @@
      ["insert into users (id, pass) values (?,?) on conflict (id) do nothing"
       userid pass]))
   )
+
+
+(defn get-user
+  [user-id]
+  (first
+   (sql/query db-conn
+              ["select * from users where id = ?" user-id])))
