@@ -1,8 +1,8 @@
 (ns picture-gallery.routes.auth
   (:require [compojure.core :refer [defroutes GET POST]]
+            [picture-gallery.models.db :as db]
             [picture-gallery.views.auth :as va]
             [ring.util.response :as response]))
-
 
 (defn registration-error?
   [id pass pass1]
@@ -20,8 +20,9 @@
   (if-let [error-msg (registration-error? id pass pass1)]
     (va/registration-page id
                           error-msg)
-    (assoc-in (response/redirect "/" :see-other)
-              [:session :user-id] id)))
+    (do (db/create-user {:id id :pass pass})
+        (assoc-in (response/redirect "/" :see-other)
+                  [:session :user-id] id))))
 
 
 (defroutes auth-routes

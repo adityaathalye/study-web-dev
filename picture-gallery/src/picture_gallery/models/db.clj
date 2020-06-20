@@ -42,3 +42,14 @@
   ^{:doc "A pooled connection, useful for most CRUD purposes, except
   for prepared statements. Those must be done separately."}
   (pool db-spec))
+
+
+(defn create-user
+  [user]
+  (sql/insert! db-conn
+               :users
+               user))
+
+(comment
+  (sql/query db-conn
+             ["select * from users limit 10"]))
