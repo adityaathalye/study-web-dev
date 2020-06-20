@@ -44,12 +44,31 @@
   (pool db-spec))
 
 
-(defn create-user
-  [user]
-  (sql/insert! db-conn
-               :users
-               user))
+(defn create-one-user
+  "Create a single user record IFF it is absent in users table.
+  Return true if created, false otherwise.
+
+  Use concurrency-safe UPSERT, available since PostgreSQL v9.5, so we can
+  avoid having to try/catch postgres insert exceptions here.
+
+  ref: https://www.postgresql.org/docs/9.5/sql-insert.html#SQL-ON-CONFLICT"
+  [{:keys [id pass] :as user}]
+  (= 1
+     (first (sql/execute!
+             db-conn
+             ["INSERT INTO users (id, pass) VALUES (?,?) ON CONFLICT (id) DO NOTHING"
+              id pass]))))
+
 
 (comment
   (sql/query db-conn
-             ["select * from users limit 10"]))
+             ["select * from users limit 10"])
+
+  ;; Postgres supports UPSERT by way of "ON CONFLICT", which is concurrency-safe
+  (let [userid "foo"
+        pass (str "randompass" (rand))]
+    (sql/execute!
+     db-conn
+     ["insert into users (id, pass) values (?,?) on conflict (id) do nothing"
+      userid pass]))
+  )

@@ -4,6 +4,7 @@
             [picture-gallery.views.auth :as va]
             [ring.util.response :as response]))
 
+
 (defn registration-error?
   [id pass pass1]
   (cond (empty? id)
@@ -17,12 +18,20 @@
 
 (defn handle-registration
   [id pass pass1]
-  (if-let [error-msg (registration-error? id pass pass1)]
-    (va/registration-page id
-                          error-msg)
-    (do (db/create-user {:id id :pass pass})
-        (assoc-in (response/redirect "/" :see-other)
-                  [:session :user-id] id))))
+  (let [form-error-msg (registration-error? id pass pass1)
+        user-created? (db/create-one-user {:id id :pass pass})]
+    (cond
+      ;; complain if non-compliant input
+      form-error-msg
+      (va/registration-page id
+                            form-error-msg)
+      ;; complain if user exists
+      (not user-created?)
+      (va/registration-page id
+                            "Sorry, user name is already taken.")
+      ;; go ahead
+      :else (assoc-in (response/redirect "/" :see-other)
+                      [:session :user-id] id))))
 
 
 (defroutes auth-routes
