@@ -43,13 +43,31 @@
                       [:session :user-id] id))))
 
 
+(defn login-or-redirect
+  [{{user-id :user-id error :error} :session}]
+  (if user-id
+    (assoc-in (response/redirect "/" :see-other)
+              [:session :user-id] user-id)
+    (va/login-page error)))
+
+
 (defn handle-login
-  [id pass]
-  (let [user (db/get-user id)]
-    (if (and (= (:id user) id)
-             (= (:pass user) pass))
+  [{{:keys [id pass]} :params
+    session :session :as request}]
+  (let [user (db/get-user id)
+        session-live? (not-empty (:user-id session))]
+    (cond
+      ;; prevent login without logout
+      session-live?
       (assoc-in (response/redirect "/" :see-other)
                 [:session :user-id] id)
+      ;; actual login
+      (and (= (:id user) id)
+           (= (:pass user) pass))
+      (assoc-in (response/redirect "/" :see-other)
+                [:session :user-id] id)
+      ;; failed login infinite loop
+      :else
       (-> (response/redirect "/login" :see-other)
           (assoc-in [:session :error]
                     "Bad username or password. Please retry.")
@@ -70,10 +88,10 @@
   (POST "/register" [id pass pass1]
         (handle-registration id pass pass1))
 
-  (GET "/login" {{error :error} :session}
-       (va/login-page error))
-  (POST "/login" [id pass]
-        (handle-login id pass))
+  (GET "/login" request
+       (login-or-redirect request))
+  (POST "/login" request
+        (handle-login request))
 
   (GET "/logout" []
        (handle-logout)))
