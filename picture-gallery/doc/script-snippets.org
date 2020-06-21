@@ -35,29 +35,32 @@
         printf "\n\n===%s===\n" "${1}"
     }
 
-    echo "futzing around with user ${rand_userid}"
+    execute_actions() {
+        printf "===%s===" "About to execute various auth actions for user ${rand_userid}"
 
-    about_to_execute "POST REGISTER"
-    post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
+        about_to_execute "POST REGISTER"
+        post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
 
-    about_to_execute "POST LOGIN"
-    post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
+        about_to_execute "POST LOGIN"
+        post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
 
-    about_to_execute "POST LOGIN AGAIN"
-    post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
+        about_to_execute "POST LOGIN AGAIN"
+        post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
 
-    about_to_execute "POST REGISTER AGAIN"
-    post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
+        about_to_execute "POST REGISTER AGAIN"
+        post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
 
-    about_to_execute "GET LOGIN redirects to HOME (diff below must be empty)"
-    diff -c -s <(goto_url "login") <(goto_url ' ')
+        about_to_execute "GET LOGIN redirects to HOME (diff below must be empty)"
+        diff -s --label "<REDIRECT FROM LOGIN>" <(goto_url "login") --label "<LOGGED IN HOME PAGE>" <(goto_url ' ')
 
-    about_to_execute "GET REGISTER redirects to HOME (diff below must be empty)"
-    diff -s <(goto_url "register") <(goto_url ' ')
+        about_to_execute "GET REGISTER redirects to HOME (diff below must be empty)"
+        diff -s --label "<REDIRECT FROM REGISTER>" <(goto_url "register") --label "<LOGGED IN HOME PAGE>" <(goto_url ' ')
 
-    about_to_execute "DELETE ${rand_userid} record from test db"
-    cleanup_record_from_db ${rand_userid}
+        about_to_execute "DELETE ${rand_userid} record from test db"
+        cleanup_record_from_db ${rand_userid}
+    }
 
+    execute_actions
     # cleanup_tmp_files # call if needed
 
   #+END_SRC
