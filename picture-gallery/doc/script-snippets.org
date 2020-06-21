@@ -1,0 +1,66 @@
+* Curl tests
+  #+BEGIN_SRC shell :results output file :file test_curl_output :output-dir /tmp/
+    cookiejar="/tmp/test_curl_cookiejar"
+    rand_userid="foo${RANDOM}"
+
+    cleanup_tmp_files() {
+        rm "${cookiejar}" "/tmp/test_curl_output"
+    }
+
+    cleanup_record_from_db() {
+        local user_id=${1:?"Fatal. Must pass unique user id."}
+
+        psql -d "gallery" -c "DELETE from users where id = $(printf "\'%s\'" ${user_id});"
+    }
+
+    post_urlencoded_form() {
+        local route=${1:?"Fail. Please pass route."}
+        local data=${2:?"Fail. Please pass urlencoded data."}
+        local hostport=${3:-"localhost:8080"}
+
+        curl -L -c "${cookiejar}" \
+             -POST -H "Content-Type: application/x-www-form-urlencoded" \
+             -d "${data}" "http://${hostport}/${route}"
+    }
+
+    goto_url() {
+        local route=${1:?"Fail. Please pass route."}
+        local hostport=${2:-"localhost:8080"}
+
+        curl -L -b "${cookiejar}" \
+             -GET "http://${hostport}/${route}"
+    }
+
+    about_to_execute() {
+        printf "\n\n===%s===\n" "${1}"
+    }
+
+    echo "futzing around with user ${rand_userid}"
+
+    about_to_execute "POST REGISTER"
+    post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
+
+    about_to_execute "POST LOGIN"
+    post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
+
+    about_to_execute "POST LOGIN AGAIN"
+    post_urlencoded_form "login" "id=${rand_userid}&pass=randompass"
+
+    about_to_execute "POST REGISTER AGAIN"
+    post_urlencoded_form "register" "id=${rand_userid}&pass=randompass&pass1=randompass"
+
+    about_to_execute "GET LOGIN redirects to HOME (diff below must be empty)"
+    diff -c -s <(goto_url "login") <(goto_url ' ')
+
+    about_to_execute "GET REGISTER redirects to HOME (diff below must be empty)"
+    diff -s <(goto_url "register") <(goto_url ' ')
+
+    about_to_execute "DELETE ${rand_userid} record from test db"
+    cleanup_record_from_db ${rand_userid}
+
+    # cleanup_tmp_files # call if needed
+
+  #+END_SRC
+
+  #+RESULTS:
+  [[file:/tmp/test_curl_output]]
