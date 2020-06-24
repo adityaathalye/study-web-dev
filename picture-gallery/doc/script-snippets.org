@@ -23,6 +23,16 @@
              -d "${data}" "http://${hostport}/${route}"
     }
 
+    post_image_form() {
+        local route=${1:?"Fail. Please pass route."}
+        local imgfile=${2:?"Fail. Please pass urlencoded data."}
+        local hostport=${3:-"localhost:8080"}
+
+        curl -L -c "${cookiejar}" \
+             -POST -H "Content-Type: multipart/form-data" \
+             -F file=@${imgfile} "http://${hostport}/${route}"
+    }
+
     goto_url() {
         local route=${1:?"Fail. Please pass route."}
         local hostport=${2:-"localhost:8080"}
@@ -35,7 +45,7 @@
         printf "\n\n===%s===\n" "${1}"
     }
 
-    execute_actions() {
+    execute_auth_actions() {
         printf "===%s===" "About to execute various auth actions for user ${rand_userid}"
 
         about_to_execute "POST REGISTER"
@@ -60,9 +70,53 @@
         cleanup_record_from_db ${rand_userid}
     }
 
-    execute_actions
-    # cleanup_tmp_files # call if needed
+    execute_upload_image() {
+        # hex codes from wikipedia for PNG
+        redpixel="$(cat <<EOF
+    89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52
+    00 00 00 01 00 00 00 01 08 02 00 00 00 90 77 53
+    DE 00 00 00 0C 49 44 41 54 08 D7 63 F8 CF C0 00
+    00 03 01 01 00 18 DD 8D B0 00 00 00 00 49 45 4E
+    44 AE 42 60 82
+    EOF
+                )"
+        imgfile="/tmp/redpixel.png"
 
+        xxd -r -p <(echo "${redpixel}") > ${imgfile}
+
+        about_to_execute "POST image file"
+        post_image_form "upload" "${imgfile}" |
+            # the page must have this error message
+            grep -o "success"
+
+        rm ${imgfile}
+    }
+
+    execute_upload_null_image() {
+        imgfile="/tmp/emptyfile"
+
+        cat /dev/null > "${imgfile}"
+
+        about_to_execute "POST NULL file"
+        post_image_form "upload" "${imgfile}" |
+            # although image is null, it's still a file
+            grep -o "success"
+        rm ${imgfile}
+    }
+
+    execute_upload_no_image() {
+        about_to_execute "POST NO file at all"
+        post_urlencoded_form "upload" "file=" |
+            # the page must have this error message
+            grep -o "please select a file to upload"
+    }
+
+
+    execute_auth_actions
+    execute_upload_image
+    execute_upload_null_image
+    execute_upload_no_image
+    # cleanup_tmp_files # call if needed
   #+END_SRC
 
   #+RESULTS:
