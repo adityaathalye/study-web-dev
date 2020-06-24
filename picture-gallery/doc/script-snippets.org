@@ -108,7 +108,7 @@
         about_to_execute "POST NO file at all"
         post_urlencoded_form "upload" "file=" |
             # the page must have this error message
-            grep -o "please select a file to upload"
+            grep -o "Please select a file to upload"
     }
 
 

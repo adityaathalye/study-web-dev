@@ -11,3 +11,4 @@ pom.xml
 .lein-env
 /resources/env/*
 !/resources/env/default.edn
+/resources/galleries
