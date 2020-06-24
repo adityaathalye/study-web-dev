@@ -1,6 +1,7 @@
 (ns picture-gallery.views.home
   (:require [hiccup.element :as he]
-            [picture-gallery.views.layout :as layout]))
+            [picture-gallery.views.layout :as layout]
+            [picture-gallery.views.auth :as va]))
 
 (defn home [& [user-id error-msg]]
   (layout/common [:div
