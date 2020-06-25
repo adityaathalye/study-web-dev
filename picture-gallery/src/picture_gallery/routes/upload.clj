@@ -11,6 +11,12 @@
            javax.imageio.ImageIO))
 
 
+(defn upload-or-redirect
+  [{session :session}]
+  (if (:user-id session)
+    (vu/upload-page)
+    (response/redirect "/" :see-other)))
+
 (defn handle-upload
   "Process 'params' for file upload, which is of the form:
   {:file
@@ -37,8 +43,8 @@
 
 
 (defroutes upload-routes
-  (GET "/upload" []
-       (vu/upload-page))
+  (GET "/upload" request
+       (upload-or-redirect request))
   (POST "/upload" [file]
         (handle-upload file))
   (GET "img/:file-name" [file-name]
