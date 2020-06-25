@@ -11,6 +11,28 @@
            javax.imageio.ImageIO))
 
 
+(defn- file-path
+  [& path-slugs]
+  (->> path-slugs
+       (interpose File/separator)
+       (apply str)))
+
+
+(def galleries
+  (file-path "resources"
+             "galleries"))
+
+
+(defn image-upload-path
+  ([user-id]
+   (file-path galleries
+              user-id))
+  ([user-id file-name]
+   (file-path galleries
+              user-id
+              file-name)))
+
+
 (defn upload-or-redirect
   [{session :session}]
   (if (:user-id session)
@@ -26,9 +48,9 @@
      :tempfile #object[java.io.File 0x4d0cdaae /tmp/ring-multipart-2332893460722567376.tmp],
      :size 2695}}"
   [{{:keys [file]} :params
-    session :session}]
+    {:keys [user-id] :as session} :session}]
   (cond
-    (empty? (:user-id session))
+    (empty? user-id)
     (response/redirect "/" :see-other)
 
     (empty? file)
@@ -36,21 +58,20 @@
                     nil
                     "Please select a file to upload.")
 
-    :else
-    (do (io/copy (:tempfile file)
-                 (io/file "resources" "galleries" (:filename file)))
-        (vu/upload-page session
-                        (hut/url-encode (:filename file))))))
+    :else ;; upload to server, and render back to user
+    (let [upload-to-path (image-upload-path user-id (:filename file))
+          views-slug (str user-id "/"
+                          (hut/url-encode (:filename file)))]
+      (io/copy (:tempfile file)
+               (io/file upload-to-path))
+      (vu/upload-page session
+                      views-slug))))
 
 
 (defn serve-file
-  [file-name]
+  [user-id file-name]
   (response/file-response
-   (str "resources"
-        File/separator
-        "galleries"
-        File/separator
-        file-name)))
+   (image-upload-path user-id file-name)))
 
 
 (defroutes upload-routes
@@ -58,5 +79,5 @@
        (upload-or-redirect request))
   (POST "/upload" request
         (handle-upload request))
-  (GET "img/:file-name" [file-name]
-       (serve-file file-name)))
+  (GET "/img/:user-id/:file-name" [user-id file-name]
+       (serve-file user-id file-name)))

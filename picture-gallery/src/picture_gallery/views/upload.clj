@@ -12,9 +12,10 @@
    (cond
      error
      [:p.error error]
+
      img
      (he/image {:height "150px"}
-               (str "galleries/" img))
+               (str "/img/" img))
      :else [:p "Please select a file to upload."])
    (hf/form-to {:enctype "multipart/form-data"}
                [:post "/upload"]

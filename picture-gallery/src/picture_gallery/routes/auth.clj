@@ -1,10 +1,10 @@
 (ns picture-gallery.routes.auth
   (:require [compojure.core :refer [defroutes GET POST]]
             [picture-gallery.models.db :as db]
+            [picture-gallery.routes.upload :as ru]
             [picture-gallery.views.auth :as va]
-            [ring.util.response :as response]
-            [picture-gallery.views.home :as vh]))
-
+            [ring.util.response :as response])
+  (:import java.io.File))
 
 (defn registration-error?
   [id pass pass1]
@@ -25,6 +25,12 @@
     (va/registration-page)))
 
 
+(defn create-gallery-dir
+  [id]
+  (when-let [gallery-path (ru/image-upload-path id)]
+    (.mkdirs (File. gallery-path))))
+
+
 (defn handle-registration
   [id pass pass1]
   (let [form-error-msg (registration-error? id pass pass1)
@@ -39,8 +45,9 @@
       (va/registration-page id
                             "Sorry, user name is already taken.")
       ;; go ahead
-      :else (assoc-in (response/redirect "/" :see-other)
-                      [:session :user-id] id))))
+      :else (do (create-gallery-dir id)
+                (assoc-in (response/redirect "/" :see-other)
+                          [:session :user-id] id)))))
 
 
 (defn login-or-redirect
