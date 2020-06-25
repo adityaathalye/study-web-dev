@@ -14,8 +14,9 @@
 (defn upload-or-redirect
   [{session :session}]
   (if (:user-id session)
-    (vu/upload-page)
+    (vu/upload-page session)
     (response/redirect "/" :see-other)))
+
 
 (defn handle-upload
   "Process 'params' for file upload, which is of the form:
@@ -24,12 +25,22 @@
      :content-type image/png,
      :tempfile #object[java.io.File 0x4d0cdaae /tmp/ring-multipart-2332893460722567376.tmp],
      :size 2695}}"
-  [{:keys [filename tempfile] :as file}]
-  (println file)
-  (if (empty? file)
-    (vu/upload-page)
-    (do (io/copy tempfile (io/file "resources" "galleries" filename))
-      (vu/upload-page (hut/url-encode filename)))))
+  [{{:keys [file]} :params
+    session :session}]
+  (cond
+    (empty? (:user-id session))
+    (response/redirect "/" :see-other)
+
+    (empty? file)
+    (vu/upload-page session
+                    nil
+                    "Please select a file to upload.")
+
+    :else
+    (do (io/copy (:tempfile file)
+                 (io/file "resources" "galleries" (:filename file)))
+        (vu/upload-page session
+                        (hut/url-encode (:filename file))))))
 
 
 (defn serve-file
@@ -45,7 +56,7 @@
 (defroutes upload-routes
   (GET "/upload" request
        (upload-or-redirect request))
-  (POST "/upload" [file]
-        (handle-upload file))
+  (POST "/upload" request
+        (handle-upload request))
   (GET "img/:file-name" [file-name]
        (serve-file file-name)))

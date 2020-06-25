@@ -1,11 +1,13 @@
 (ns picture-gallery.views.upload
   (:require [picture-gallery.views.layout :as layout]
             [hiccup.form :as hf]
-            [hiccup.element :as he]))
+            [hiccup.element :as he]
+            [picture-gallery.views.common :as vc]))
 
 (defn upload-page
-  [& [img error]]
+  [& [session img error]]
   (layout/common
+   (vc/top-nav session)
    [:h2 "Upload an image"]
    (cond
      error
