@@ -3,4 +3,4 @@
             [picture-gallery.views.home :as vh]))
 
 (defroutes home-routes
-  (GET "/" {{user-id :user-id} :session} (vh/home user-id)))
+  (GET "/" request (vh/home (:session request))))

@@ -21,3 +21,7 @@ label {
 p.error {
     color: #FF0000
 }
+
+span.top-menu-item {
+    margin: 5px;
+}
